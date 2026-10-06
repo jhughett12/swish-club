@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Swish Club</title>
+<style>
+:root{--bg:#0b0b0d;--card:#17171a;--card2:#202024;--text:#fff;--muted:#9d9da5;--accent:#ff7a00;--good:#35d07f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}
+.app{max-width:520px;margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 18px calc(28px + env(safe-area-inset-bottom))}
+header{padding:22px 2px 12px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:28px;font-weight:800;letter-spacing:-1px}.ball{font-size:25px}
+.sub{color:var(--muted);font-size:13px;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.card{background:var(--card);border-radius:20px;padding:17px}
+.label{color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.7px}
+.value{font-size:31px;font-weight:800;margin-top:5px}
+.main{text-align:center;padding:18px 0}
+.make{width:min(270px,75vw);height:min(270px,75vw);border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:31px;font-weight:900;box-shadow:0 14px 40px #ff7a0030;touch-action:manipulation}
+.make:active{transform:scale(.96)}
+.make small{display:block;font-size:13px;font-weight:700;opacity:.8;margin-top:7px}
+.undo{border:0;background:transparent;color:var(--muted);font-size:14px;padding:16px}
+.progress{height:9px;background:#303035;border-radius:99px;overflow:hidden;margin-top:11px}
+.bar{height:100%;width:0;background:var(--accent);border-radius:99px;transition:.25s}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.goalbtn,.quick button,.danger{border:0;border-radius:13px;background:var(--card2);color:#fff;padding:10px 13px;font-weight:700}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.quick button{font-size:15px;padding:13px}
+.section{margin-top:18px}.section h2{font-size:17px;margin:0 0 10px}
+.days{display:grid;gap:8px}.day{background:var(--card);border-radius:15px;padding:12px 14px}.day .date{font-size:13px;color:var(--muted)}.day .count{font-size:18px;font-weight:800}
+.activity{max-height:180px;overflow:auto}.empty{color:var(--muted);font-size:14px;padding:14px 2px}
+.footer{margin-top:25px;text-align:center}.danger{color:#ff6b6b;background:#241719}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;justify-content:center;padding:15px}.sheet{width:min(520px,100%);background:#1b1b1f;border-radius:24px;padding:20px}.sheet h3{margin:0 0 14px}.sheet input{width:100%;padding:14px;border:0;border-radius:13px;background:#303035;color:#fff;font-size:18px}.sheet .actions{display:flex;gap:10px;margin-top:12px}.sheet button{flex:1;border:0;border-radius:13px;padding:14px;font-weight:800}.save{background:var(--accent);color:#fff}.cancel{background:#303035;color:#fff}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:11px 16px;border-radius:99px;font-weight:800;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div><div class="brand">Swish Club 🏀</div><div class="sub">Track every make. Get better every day.</div></div><div class="ball">🔥</div></header>
+
+<div class="grid">
+ <div class="card"><div class="label">All-Time Makes</div><div class="value" id="total">0</div></div>
+ <div class="card"><div class="label">This Week</div><div class="value" id="week">0</div></div>
+</div>
+
+<div class="main">
+ <button class="make" id="make">+ MAKE<small>Tap for every made shot</small></button>
+ <button class="undo" id="undo">↩ Undo last make</button>
+</div>
+
+<div class="card">
+ <div class="row"><div><div class="label">Weekly Goal</div><div><b id="goalText">0 / 500</b></div></div><button class="goalbtn" id="setGoal">Set Goal</button></div>
+ <div class="progress"><div class="bar" id="bar"></div></div>
+</div>
+
+<div class="grid">
+ <div class="card"><div class="label">Today</div><div class="value" id="today">0</div></div>
+ <div class="card"><div class="label">Best Day</div><div class="value" id="best">0</div></div>
+ <div class="card"><div class="label">Sessions</div><div class="value" id="sessions">0</div></div>
+ <div class="card"><div class="label">Streak</div><div class="value" id="streak">0 🔥</div></div>
+</div>
+
+<div class="section">
+<h2>Quick Session</h2>
+<div class="quick"><button data-add="25">+25</button><button data-add="50">+50</button><button data-add="100">+100</button></div>
+</div>
+
+<div class="section">
+<h2>Last 7 Days</h2><div class="days" id="days"></div>
+</div>
+
+<div class="section">
+<h2>Recent Activity</h2><div class="card activity" id="activity"></div>
+</div>
+
+<div class="footer"><button class="danger" id="reset">Reset All Stats</button></div>
+</div>
+
+<div class="modal" id="modal"><div class="sheet">
+<h3>Set Weekly Goal</h3><input id="goalInput" type="number" min="1" inputmode="numeric" placeholder="500">
+<div class="actions"><button class="cancel" id="cancel">Cancel</button><button class="save" id="saveGoal">Save Goal</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY="swishClubV1";
+let state=JSON.parse(localStorage.getItem(KEY)||'null')||{days:{},goal:500,history:[],sessions:0};
+const pad=n=>String(n).padStart(2,"0");
+const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayKey=()=>key(new Date());
+const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+const add=(n,session=true)=>{
+ const k=todayKey(); state.days[k]=(state.days[k]||0)+n;
+ state.history.unshift({time:new Date().toISOString(),amount:n});
+ if(session) state.sessions++;
+ state.history=state.history.slice(0,50); save(); render();
+};
+const startOfWeek=d=>{let x=new Date(d);let day=x.getDay();let diff=(day+6)%7;x.setDate(x.getDate()-diff);x.setHours(0,0,0,0);return x};
+const weekTotal=()=>{let start=startOfWeek(new Date()),sum=0;for(let i=0;i<7;i++){let d=new Date(start);d.setDate(start.getDate()+i);sum+=state.days[key(d)]||0}return sum};
+const streak=()=>{let n=0,d=new Date();while((state.days[key(d)]||0)>0){n++;d.setDate(d.getDate()-1)}return n};
+const fmtDate=k=>new Date(k+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+function render(){
+ let total=Object.values(state.days).reduce((a,b)=>a+b,0), week=weekTotal(), today=state.days[todayKey()]||0,best=Math.max(0,...Object.values(state.days));
+ totalEl.textContent=total;weekEl.textContent=week;todayEl.textContent=today;bestEl.textContent=best;sessionsEl.textContent=state.sessions;streakEl.textContent=streak()+" 🔥";
+ goalText.textContent=`${week} / ${state.goal}`;bar.style.width=Math.min(100,week/state.goal*100)+"%";
+ let ds=[];for(let i=6;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);let k=key(d);ds.push(`<div class="day"><div class="row"><span class="date">${i===0?"Today":fmtDate(k)}</span><span class="count">${state.days[k]||0}</span></div></div>`)}days.innerHTML=ds.join("");
+ activity.innerHTML=state.history.length?state.history.slice(0,12).map(x=>`<div class="row" style="padding:8px 0;border-bottom:1px solid #29292d"><span>${new Date(x.time).toLocaleString(undefined,{weekday:"short",hour:"numeric",minute:"2-digit"})}</span><b>+${x.amount}</b></div>`).join(""):`<div class="empty">Your makes will show up here.</div>`;
+}
+const totalEl=document.getElementById("total"),weekEl=document.getElementById("week"),todayEl=document.getElementById("today"),bestEl=document.getElementById("best"),sessionsEl=document.getElementById("sessions"),streakEl=document.getElementById("streak"),goalText=document.getElementById("goalText"),bar=document.getElementById("bar"),days=document.getElementById("days"),activity=document.getElementById("activity");
+make.onclick=()=>{add(1,false);toast("SWISH! +1")};
+undo.onclick=()=>{let k=todayKey();if((state.days[k]||0)>0){state.days[k]--;if(!state.days[k])delete state.days[k];let i=state.history.findIndex(x=>new Date(x.time).toDateString()===new Date().toDateString());if(i>=0)state.history.splice(i,1);save();render();toast("Last make undone")}else toast("Nothing to undo")};
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{add(+b.dataset.add,true);toast("Session added!")});
+setGoal.onclick=()=>{goalInput.value=state.goal;modal.style.display="flex";setTimeout(()=>goalInput.focus(),50)};
+cancel.onclick=()=>modal.style.display="none";
+saveGoal.onclick=()=>{let n=Math.max(1,parseInt(goalInput.value)||500);state.goal=n;save();modal.style.display="none";render();toast("Goal updated!")};
+reset.onclick=()=>{if(confirm("Reset all Swish Club stats? This cannot be undone.")){state={days:{},goal:500,history:[],sessions:0};save();render();toast("Stats reset")}};
+const toastEl=document.getElementById("toast");let tt;
+function toast(s){toastEl.textContent=s;toastEl.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>toastEl.classList.remove("show"),1200)}
+render();
+</script>
+</body>
+</html>
